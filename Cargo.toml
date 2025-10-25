@@ -1,0 +1,19 @@
+[package]
+name = "test-secrets-ark"
+version = "0.1.0"
+edition = "2021"
+
+# IMPORTANT: Must be a binary, not a library
+[[bin]]
+name = "test-secrets-ark"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+codegen-units = 1
