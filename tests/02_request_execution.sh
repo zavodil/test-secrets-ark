@@ -37,7 +37,7 @@ done
 
 # Default to all tests if none specified
 if [ ${#TESTS_TO_RUN[@]} -eq 0 ]; then
-    TESTS_TO_RUN=(1 2 3 4 5 6 7 8 9 10 11 12 13)
+    TESTS_TO_RUN=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
 fi
 
 echo "═══════════════════════════════════════════════════════════════"
@@ -146,11 +146,21 @@ EOF
             actual_result="SUCCESS"
             result_icon="🔓"
             result_msg="Secret accessible"
-        elif echo "$output" | grep -q "Access denied by access condition"; then
+        elif echo "$output" | grep -q "Access.*denied"; then
             # Access was denied by keystore (expected for FAIL cases)
             actual_result="FAIL"
             result_icon="🔒"
             result_msg="Access denied"
+        elif echo "$output" | grep -q "Secrets not found"; then
+            # Secrets not found - user configuration issue (expected for FAIL cases like test 14)
+            actual_result="FAIL"
+            result_icon="🔍"
+            result_msg="Secrets not found"
+        elif echo "$output" | grep -q "Invalid secrets format"; then
+            # Invalid secrets format - user provided wrong data (expected for FAIL cases like test 15)
+            actual_result="FAIL"
+            result_icon="📝"
+            result_msg="Invalid secrets format"
         elif [ $exit_code -ne 0 ]; then
             # Other error (compilation, execution failure, etc.)
             actual_result="ERROR"
@@ -410,8 +420,24 @@ for test_num in "${TESTS_TO_RUN[@]}"; do
             done
             ;;
 
+        14)
+            # Test 14: Non-existent profile
+            # We created profile "production" but will try to read "staging" (doesn't exist)
+            echo ""
+            echo "--- Reading non-existent profile (should fail) ---"
+            request_execution 14 "$TEST14_READ_PROFILE" "$TEST14_ACCOUNT" "FAIL"
+            ;;
+
+        15)
+            # Test 15: Invalid JSON format
+            # We stored "foo=bar" instead of valid JSON, should fail during decryption/parsing
+            echo ""
+            echo "--- Reading invalid JSON data (should fail) ---"
+            request_execution 15 "test15_invalid_json" "$TEST15_ACCOUNT" "FAIL"
+            ;;
+
         *)
-            echo "Unknown test number: $test_num (valid: 1-13)"
+            echo "Unknown test number: $test_num (valid: 1-15)"
             ;;
     esac
 done

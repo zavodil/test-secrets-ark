@@ -36,7 +36,7 @@ done
 
 # Default to all tests if none specified
 if [ ${#TESTS_TO_RUN[@]} -eq 0 ]; then
-    TESTS_TO_RUN=(1 2 3 4 5 6 7 8 9 10 11 12 13)
+    TESTS_TO_RUN=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
 fi
 
 echo "═══════════════════════════════════════════════════════════════"
@@ -258,8 +258,82 @@ for test_num in "${TESTS_TO_RUN[@]}"; do
                 '{"Logic": {"operator": "And", "conditions": [{"Logic": {"operator": "Or", "conditions": [{"Whitelist": {"accounts": '"$WHITELIST_JSON"'}}, {"AccountPattern": {"pattern": "'"$TEST13_PATTERN"'"}}]}}, {"NearBalance": {"operator": "Gte", "value": "'"$TEST13_MIN_NEAR"'"}}]}}'
             ;;
 
+        14)
+            # Test 14: Non-existent profile - create "production" but will read "staging"
+            # This test only creates the secret. Test 02 will try to read wrong profile.
+            store_secret 14 \
+                "$TEST14_CREATE_PROFILE" \
+                "test14_production_secret" \
+                '"AllowAll"'
+            ;;
+
+        15)
+            # Test 15: Invalid JSON format - encrypt "foo=bar" instead of valid JSON
+            # This should cause decryption/parsing error when worker tries to use it
+            echo ""
+            print_test_info "$test_num"
+            echo ""
+            echo "Creating secret with INVALID format: $TEST15_INVALID_SECRETS"
+            echo ""
+
+            # Encrypt the invalid string (not JSON) using keystore API
+            echo "🔐 Encrypting invalid data via keystore..." >&2
+            encrypted_base64=$(encrypt_secrets_json "$REPO" "$OWNER" "$BRANCH" "$TEST15_INVALID_SECRETS")
+
+            if [ -z "$encrypted_base64" ]; then
+                echo "Error: Failed to encrypt secrets" >&2
+                exit 1
+            fi
+
+            echo "✅ Encrypted successfully (but data is invalid JSON)" >&2
+            echo ""
+
+            # Build JSON args
+            json_args=$(printf '{
+  "repo": "%s",
+  "branch": "%s",
+  "profile": "%s",
+  "encrypted_secrets_base64": "%s",
+  "access": "AllowAll"
+}' "$REPO" "$BRANCH" "test15_invalid_json" "$encrypted_base64")
+
+            if [ "$SEND_TO_CHAIN" = true ]; then
+                echo "📤 Sending transaction to chain..." >&2
+
+                temp_json=$(mktemp /tmp/near_args.XXXXXX)
+                echo "$json_args" > "$temp_json"
+
+                near contract call-function as-transaction \
+                    "$CONTRACT" \
+                    store_secrets \
+                    file-args "$temp_json" \
+                    prepaid-gas '100.0 Tgas' \
+                    attached-deposit '0.1 NEAR' \
+                    sign-as "$OWNER" \
+                    network-config testnet \
+                    sign-with-keychain \
+                    send
+
+                rm -f "$temp_json"
+                echo ""
+                echo "✅ Transaction sent!" >&2
+            else
+                echo "near contract call-function as-transaction \\"
+                echo "  $CONTRACT \\"
+                echo "  store_secrets \\"
+                echo "  json-args '$json_args' \\"
+                echo "  prepaid-gas '100.0 Tgas' \\"
+                echo "  attached-deposit '0.1 NEAR' \\"
+                echo "  sign-as $OWNER \\"
+                echo "  network-config testnet \\"
+                echo "  sign-with-keychain \\"
+                echo "  send"
+            fi
+            echo ""
+            ;;
+
         *)
-            echo "Unknown test number: $test_num (valid: 1-13)"
+            echo "Unknown test number: $test_num (valid: 1-15)"
             ;;
     esac
 done

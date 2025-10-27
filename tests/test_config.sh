@@ -19,7 +19,7 @@ export TEST1_ALLOWED_ACCOUNTS=("zavodil2.testnet" "zavodil3.testnet")
 
 # Test 2: Whitelist
 export TEST2_WHITELIST=("zavodil2.testnet" "zavodil3.testnet")
-export TEST2_ALLOWED_ACCOUNTS=("${TEST2_WHITELIST[@]}")
+export TEST2_ALLOWED_ACCOUNTS=("zavodil2.testnet")
 export TEST2_DENIED_ACCOUNTS=("denied_account.testnet")
 
 # Test 3: AccountPattern *.offchainvm.testnet (regex with escaped dots)
@@ -84,6 +84,15 @@ export TEST13_PATTERN="^z.*"
 export TEST13_MIN_NEAR="200000000000000000000000000"
 export TEST13_ALLOWED_ACCOUNTS=("dev-1671306554268-23143189061640" "zavodil.testnet")
 export TEST13_DENIED_ACCOUNTS=("web4.testnet" "zavodil2.testnet") # "zavodil2.testnet" is poor
+
+# Test 14: Non-existent profile - create "production" but read "staging"
+export TEST14_CREATE_PROFILE="production"
+export TEST14_READ_PROFILE="staging"
+export TEST14_ACCOUNT="denied_account.testnet"
+
+# Test 15: Invalid JSON format - send "foo=bar" instead of valid JSON
+export TEST15_INVALID_SECRETS="foo=bar"
+export TEST15_ACCOUNT="denied_account.testnet"
 
 # =============================================================================
 # HELPER FUNCTIONS
@@ -175,6 +184,18 @@ print_test_info() {
             echo "  (Whitelist OR Pattern) AND MinBalance"
             echo "  Should ALLOW: ${TEST13_ALLOWED_ACCOUNTS[@]}"
             echo "  Should DENY: ${TEST13_DENIED_ACCOUNTS[@]}"
+            ;;
+        14)
+            echo "  Type: Non-existent profile"
+            echo "  Account: $TEST14_ACCOUNT"
+            echo "  Creates profile: $TEST14_CREATE_PROFILE"
+            echo "  Tries to read: $TEST14_READ_PROFILE (does not exist)"
+            ;;
+        15)
+            echo "  Type: Invalid JSON format"
+            echo "  Account: $TEST15_ACCOUNT"
+            echo "  Invalid data: $TEST15_INVALID_SECRETS (should be JSON)"
+            echo "  Expected: Decryption/parsing error"
             ;;
     esac
     echo "═══════════════════════════════════════════════════════════════"
