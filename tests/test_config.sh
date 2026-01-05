@@ -5,7 +5,7 @@
 # =============================================================================
 # CONTRACT & REPO SETTINGS
 # =============================================================================
-export CONTRACT="c5.offchainvm.testnet"
+export CONTRACT="outlayer.testnet"
 export REPO="https://github.com/zavodil/test-secrets-ark"
 export BRANCH="main"
 export OWNER="zavodil.testnet"

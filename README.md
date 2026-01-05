@@ -35,7 +35,7 @@ All test settings are centralized in [tests/test_config.sh](tests/test_config.sh
 
 ```bash
 # Edit this file to customize:
-export CONTRACT="offchainvm.testnet"
+export CONTRACT="outlayer.testnet"
 export REPO="github.com/test-user/test-secrets-ark"
 export OWNER="owner.testnet"
 
@@ -161,7 +161,7 @@ The script generates `near call` commands using accounts from `test_config.sh`. 
 
 ```bash
 # Check execution result
-near view offchainvm.testnet get_request '{"request_id": 1}'
+near view outlayer.testnet get_request '{"request_id": 1}'
 
 # Check worker logs
 docker logs offchainvm-worker
@@ -202,7 +202,7 @@ cd tests/
 
 # Output shows command - copy and run manually
 near contract call-function as-transaction \
-  c5.offchainvm.testnet \
+  outlayer.testnet \
   store_secrets \
   json-args '{"repo":"..."}' \
   ...
