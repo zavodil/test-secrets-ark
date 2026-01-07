@@ -52,7 +52,7 @@ fn main() {
 }
 
 fn check_secrets() -> Output {
-    let keys = ["SECRET", "PROTECTED_SECRET"];
+    let keys = ["SECRET", "ANOTHER_SECRET", "PROTECTED_SECRET", "PROTECTED_ANOTHER_SECRET"];
     let mut secrets: Vec<SecretInfo> = Vec::new();
 
     // Try to read each key from environment
