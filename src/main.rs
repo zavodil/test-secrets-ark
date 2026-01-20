@@ -1,15 +1,9 @@
 //! Secrets Test Ark - Test suite for OutLayer secrets via environment variables
 //!
-//! Uses the `outlayer` SDK for project metadata and env access.
+//! Uses the `outlayer` SDK for env access.
 
-use outlayer::{metadata, env};
+use outlayer::env;
 use serde::{Deserialize, Serialize};
-
-// Required for project-based execution
-metadata! {
-    project: "zavodil2.testnet/test-secrets",
-    version: "1.0.0",
-}
 
 #[derive(Deserialize)]
 struct Input {
